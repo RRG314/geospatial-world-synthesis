@@ -1,0 +1,25 @@
+name: Provider compatibility
+description: Report a bounded provider-adapter compatibility problem.
+title: "[Provider]: "
+labels: [provider]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider type and public documentation URL
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Observed contract
+      description: Describe endpoint family, CRS, geometry type, paging, rate-limit/status behavior, and sanitised response shape. Do not paste restricted live data.
+    validations:
+      required: true
+  - type: textarea
+    id: legal
+    attributes:
+      label: Terms, license, and attribution
+      description: Link official source terms and state whether any proposed fixture is redistributable.
+    validations:
+      required: true

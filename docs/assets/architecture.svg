@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Geospatial World Synthesis architecture</title>
+  <desc id="desc">Bounded providers feed normalization, conservative reconciliation, canonical synthesis, and neutral consumers.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071015"/><stop offset="1" stop-color="#102b32"/></linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0L9 3 0 6Z" fill="#55dfc0"/></marker>
+    <style>
+      .label{fill:#55dfc0;font:700 14px ui-monospace,monospace;letter-spacing:2px}.title{fill:#edf7f7;font:650 25px system-ui,sans-serif}.body{fill:#9bb1b8;font:15px system-ui,sans-serif}.box{fill:#101d23;stroke:#31505a;stroke-width:2}.core{fill:#123038;stroke:#55dfc0;stroke-width:2}.flow{fill:none;stroke:#55dfc0;stroke-width:3;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1440" height="720" fill="url(#bg)"/>
+  <text x="70" y="76" class="label">ACTUAL v0.1.0 DATA FLOW</text>
+  <text x="70" y="118" class="title">Bounded source evidence → renderer-neutral synthesis</text>
+  <g transform="translate(70 195)">
+    <rect class="box" width="245" height="350" rx="10"/>
+    <text x="28" y="43" class="label">PROVIDERS</text><text x="28" y="84" class="title">Acquire</text>
+    <text x="28" y="125" class="body">Local records</text><text x="28" y="160" class="body">GeoJSON HTTP</text><text x="28" y="195" class="body">OGC API Features</text><text x="28" y="230" class="body">ArcGIS Feature Service</text>
+    <path d="M28 264H217" stroke="#31505a"/><text x="28" y="300" class="body">bbox · timeout · budgets</text><text x="28" y="329" class="body">explicit license metadata</text>
+  </g>
+  <path class="flow" d="M315 370H365"/>
+  <g transform="translate(375 195)">
+    <rect class="core" width="245" height="350" rx="10"/>
+    <text x="28" y="43" class="label">NORMALIZE</text><text x="28" y="84" class="title">Make comparable</text>
+    <text x="28" y="125" class="body">Validate geometry</text><text x="28" y="160" class="body">Transform to CRS84</text><text x="28" y="195" class="body">Preserve source IDs</text><text x="28" y="230" class="body">Create provenance</text>
+    <path d="M28 264H217" stroke="#31505a"/><text x="28" y="300" class="body">invalid records fail safely</text><text x="28" y="329" class="body">credentials redacted</text>
+  </g>
+  <path class="flow" d="M620 370H670"/>
+  <g transform="translate(680 195)">
+    <rect class="core" width="300" height="350" rx="10"/>
+    <text x="28" y="43" class="label">RECONCILE + SYNTHESIZE</text><text x="28" y="84" class="title">Keep evidence honest</text>
+    <text x="28" y="125" class="body">Conservative identity matches</text><text x="28" y="160" class="body">Canonical entities + aliases</text><text x="28" y="195" class="body">Claims + unresolved conflicts</text><text x="28" y="230" class="body">Relationships + coverage</text>
+    <path d="M28 264H272" stroke="#31505a"/><text x="28" y="300" class="body">deterministic fingerprint</text><text x="28" y="329" class="body">frozen, versioned snapshot</text>
+  </g>
+  <path class="flow" d="M980 370H1030"/>
+  <g transform="translate(1040 195)">
+    <rect class="box" width="330" height="350" rx="10"/>
+    <text x="28" y="43" class="label">NEUTRAL CONSUMERS</text><text x="28" y="84" class="title">Inspect or integrate</text>
+    <text x="28" y="125" class="body">Canonical JSON</text><text x="28" y="160" class="body">GeoJSON</text><text x="28" y="195" class="body">CLI</text><text x="28" y="230" class="body">Static evidence viewer</text>
+    <path d="M28 264H302" stroke="#31505a"/><text x="28" y="300" class="body">No renderer assumptions</text><text x="28" y="329" class="body">No host-app dependency</text>
+  </g>
+  <text x="70" y="640" class="body">Failures remain provider status. Disagreement remains evidence. Representation policy stays with the consumer.</text>
+</svg>

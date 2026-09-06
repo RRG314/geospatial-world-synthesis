@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rrg314.github.io/geospatial-world-synthesis/schemas/source-record.schema.json",
+  "title": "Geospatial World Synthesis source record",
+  "type": "object",
+  "required": ["sourceId", "entityType", "sourceCrs"],
+  "properties": {
+    "sourceId": { "type": "string", "minLength": 1 },
+    "entityType": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "terrain"] },
+    "sourceCrs": { "type": "string", "minLength": 1 },
+    "geometry": { "oneOf": [{ "$ref": "#/$defs/geometry" }, { "type": "null" }] },
+    "properties": { "type": "object" },
+    "aliases": { "type": "array", "items": { "type": "object", "required": ["namespace", "id"], "properties": { "namespace": { "type": "string" }, "id": { "type": "string" } } } },
+    "gersId": { "type": "string" },
+    "evidenceClass": { "enum": ["DIRECT_SOURCE", "MULTI_SOURCE_SUPPORTED", "DERIVED_HIGH_CONFIDENCE", "INFERRED", "LOW_CONFIDENCE", "SYNTHETIC", "UNKNOWN"] },
+    "datasetVersion": { "type": "string" },
+    "sourceUrl": { "type": "string" },
+    "licenseId": { "type": "string" },
+    "attribution": { "type": "string" },
+    "retrievedAt": { "type": "string" },
+    "observedAt": { "type": "string" },
+    "validAt": { "type": "string" },
+    "validFrom": { "type": "string" },
+    "validTo": { "type": "string" },
+    "sourceUpdatedAt": { "type": "string" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"] },
+        "coordinates": { "type": "array" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

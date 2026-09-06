@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rrg314.github.io/geospatial-world-synthesis/schemas/synthesis-result.schema.json",
+  "title": "Geospatial World Synthesis result",
+  "type": "object",
+  "required": ["schemaVersion", "synthesisVersion", "entities", "claims", "provenance", "providerSummary", "reconciliations", "coverage", "attributions", "fingerprint", "canonicalBytes"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "synthesisVersion": { "const": 1 },
+    "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+    "provenance": { "type": "array", "items": { "$ref": "#/$defs/provenance" } },
+    "providerSummary": { "type": "array", "items": { "$ref": "#/$defs/providerSummary" } },
+    "reconciliations": { "type": "array" },
+    "coverage": { "type": "object", "required": ["byType", "directClaims", "syntheticClaims", "evidenceClassCounts", "unresolvedConflicts", "provenanceCompleteness"] },
+    "attributions": { "type": "array", "items": { "type": "object", "required": ["providerId", "datasetId", "operator", "licenseId", "attribution", "sourceUrls", "sourceRecordCount"] } },
+    "fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalBytes": { "type": "integer", "minimum": 0 },
+    "request": { "type": "object", "required": ["bounds", "requestedCapabilities", "limits"] }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": { "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"] }, "coordinates": { "type": "array" } }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["schemaVersion", "id", "type", "identityScope", "aliases", "geometry", "geometrySourceId", "claimIds", "resolved", "conflicts", "relationships", "lifecycle", "evidenceSummary"],
+      "properties": {
+        "schemaVersion": { "const": 1 }, "id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "terrain"] },
+        "identityScope": { "enum": ["gers", "source", "synthesis"] },
+        "aliases": { "type": "array" }, "geometry": { "oneOf": [{ "$ref": "#/$defs/geometry" }, { "type": "null" }] },
+        "geometrySourceId": { "type": ["string", "null"] }, "claimIds": { "type": "array", "items": { "type": "string" } },
+        "resolved": { "type": "object" }, "conflicts": { "type": "array" }, "relationships": { "type": "array" },
+        "lifecycle": { "type": "object" }, "evidenceSummary": { "type": "object" }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["schemaVersion", "id", "entityId", "property", "value", "valueType", "evidenceClass", "provenanceId", "status"],
+      "properties": {
+        "schemaVersion": { "const": 1 }, "id": { "type": "string" }, "entityId": { "type": "string" }, "property": { "type": "string" },
+        "valueType": { "type": "string" }, "evidenceClass": { "type": "string" }, "provenanceId": { "type": "string" }, "status": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["schemaVersion", "id", "providerId", "datasetId", "datasetVersion", "sourceRecordId", "sourceUrl", "licenseId", "attribution", "sourceCrs", "outputCrs", "privacy", "warnings"],
+      "properties": {
+        "schemaVersion": { "const": 1 }, "id": { "type": "string" }, "providerId": { "type": "string" }, "datasetId": { "type": "string" },
+        "datasetVersion": { "type": "string" }, "sourceRecordId": { "type": "string" }, "sourceUrl": { "type": "string" },
+        "licenseId": { "type": "string" }, "attribution": { "type": "string" }, "sourceCrs": { "type": "string" },
+        "outputCrs": { "const": "OGC:CRS84" }, "privacy": { "type": "string" }, "warnings": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "providerSummary": {
+      "type": "object",
+      "required": ["providerId", "datasetId", "licenseId", "status", "recordCount", "warnings", "error", "metrics"],
+      "properties": {
+        "providerId": { "type": "string" }, "datasetId": { "type": "string" }, "licenseId": { "type": "string" },
+        "status": { "enum": ["available", "authoritative-empty", "partial", "rate_limited", "timeout", "unavailable", "invalid_response"] },
+        "recordCount": { "type": "integer", "minimum": 0 }, "warnings": { "type": "array" },
+        "error": { "type": ["object", "null"] }, "metrics": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

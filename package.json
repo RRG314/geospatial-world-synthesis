@@ -1,0 +1,79 @@
+{
+  "name": "geospatial-world-synthesis",
+  "version": "0.1.0",
+  "description": "Renderer-neutral geospatial synthesis with canonical entities, provenance, conflicts, and neutral exports.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Steven Reid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RRG314/geospatial-world-synthesis.git"
+  },
+  "homepage": "https://github.com/RRG314/geospatial-world-synthesis#readme",
+  "bugs": {
+    "url": "https://github.com/RRG314/geospatial-world-synthesis/issues"
+  },
+  "keywords": [
+    "geospatial",
+    "gis",
+    "data-fusion",
+    "entity-resolution",
+    "provenance",
+    "geojson"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./providers": {
+      "types": "./src/providers/index.d.ts",
+      "import": "./src/providers/index.js"
+    },
+    "./schemas/*": "./schemas/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "gws": "./bin/gws.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "schemas/",
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build-viewer.mjs",
+    "check": "node scripts/check-source.mjs",
+    "check:types": "tsc --noEmit --strict --lib ES2023,DOM src/index.d.ts src/providers/index.d.ts",
+    "test": "node --test test/*.test.js",
+    "test:browser": "node scripts/test-browser.mjs",
+    "test:consumer": "node scripts/test-consumer.mjs",
+    "example": "node examples/basic-local/run.mjs",
+    "example:reconciliation": "node examples/multi-source-reconciliation/run.mjs",
+    "example:provider": "node examples/custom-provider/run.mjs",
+    "example:temporal": "node examples/temporal-evidence/run.mjs",
+    "example:export": "node examples/export/run.mjs",
+    "benchmark": "node scripts/benchmark.mjs",
+    "validate:package": "node scripts/validate-package.mjs",
+    "validate:docs": "node scripts/validate-docs.mjs",
+    "validate:release": "npm run check && npm run check:types && npm test && npm run build && npm run test:browser && npm run test:consumer && npm run example && npm run example:reconciliation && npm run example:provider && npm run example:temporal && npm run example:export && npm run benchmark && npm run validate:package && npm run validate:docs",
+    "viewer": "node scripts/serve-viewer.mjs"
+  },
+  "dependencies": {
+    "polygon-clipping": "0.15.7",
+    "proj4": "2.22.0"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "esbuild": "0.25.12",
+    "playwright": "1.61.0",
+    "typescript": "7.0.2",
+    "yaml": "2.9.0"
+  }
+}

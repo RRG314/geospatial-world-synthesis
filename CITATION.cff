@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Geospatial World Synthesis"
+abstract: "Renderer-neutral synthesis of bounded geospatial records into canonical entities, claims, provenance, conflicts, and neutral exports."
+type: software
+authors:
+  - family-names: Reid
+    given-names: Steven
+repository-code: "https://github.com/RRG314/geospatial-world-synthesis"
+url: "https://rrg314.github.io/geospatial-world-synthesis/"
+license: MIT
+version: 0.1.0
+date-released: 2026-09-06
+keywords:
+  - geospatial
+  - data fusion
+  - entity resolution
+  - provenance
+  - GeoJSON
