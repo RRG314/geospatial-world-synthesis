@@ -6,7 +6,7 @@
   "required": ["sourceId", "entityType", "sourceCrs"],
   "properties": {
     "sourceId": { "type": "string", "minLength": 1 },
-    "entityType": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "terrain"] },
+    "entityType": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "address", "terrain"] },
     "sourceCrs": { "type": "string", "minLength": 1 },
     "geometry": { "oneOf": [{ "$ref": "#/$defs/geometry" }, { "type": "null" }] },
     "properties": { "type": "object" },
@@ -29,11 +29,16 @@
   "$defs": {
     "geometry": {
       "type": "object",
-      "required": ["type", "coordinates"],
+      "required": ["type"],
       "properties": {
-        "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"] },
-        "coordinates": { "type": "array" }
+        "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"] },
+        "coordinates": { "type": "array" },
+        "geometries": { "type": "array", "items": { "$ref": "#/$defs/geometry" } }
       },
+      "oneOf": [
+        { "required": ["coordinates"], "properties": { "type": { "not": { "const": "GeometryCollection" } } } },
+        { "required": ["geometries"], "properties": { "type": { "const": "GeometryCollection" } } }
+      ],
       "additionalProperties": true
     }
   }

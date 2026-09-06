@@ -47,6 +47,7 @@ export const DEFAULT_BUILDING_MATCH_POLICY = Object.freeze({
 
 export function buildingMatchFeatures(left, right) {
   if (left.entityType !== 'building' || right.entityType !== 'building' || !left.geometry || !right.geometry) return null;
+  if (!asPolygons(left.geometry).length || !asPolygons(right.geometry).length) return null;
   const iou = polygonIou(left.geometry, right.geometry);
   const centroidDistanceM = distanceMeters(geometryCentroid(left.geometry), geometryCentroid(right.geometry));
   const areas = [geometryArea(left.geometry), geometryArea(right.geometry)];

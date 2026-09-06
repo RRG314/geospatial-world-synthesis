@@ -4,7 +4,7 @@ import { createProvenance, EVIDENCE_CLASSES } from './evidence.js';
 import { deepFreeze, stableHash } from './stable.js';
 import { ProviderError, classifyProviderError, safeErrorMessage } from './errors.js';
 
-export const ENTITY_TYPES = Object.freeze(['building', 'road', 'parcel', 'water', 'landuse', 'poi', 'terrain']);
+export const ENTITY_TYPES = Object.freeze(['building', 'road', 'parcel', 'water', 'landuse', 'poi', 'address', 'terrain']);
 export const PROVIDER_STATUSES = Object.freeze(['available', 'authoritative-empty', 'partial', 'rate_limited', 'timeout', 'unavailable', 'invalid_response']);
 
 export function validateBounds(bounds) {

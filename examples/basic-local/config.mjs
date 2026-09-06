@@ -66,6 +66,7 @@ export default function exampleConfiguration() {
     bounds,
     providers: createProviders(),
     requestedCapabilities: ['building', 'parcel', 'road', 'poi'],
+    reconciliation: { enabled: true },
     limits: { maxRecordsPerProvider: 100, maxCoordinatesPerGeometry: 10000, providerTimeoutMs: 5000 }
   };
 }

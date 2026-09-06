@@ -100,13 +100,22 @@ export function resolveClaims(claims = []) {
   const grouped = new Map();
   for (const claim of claims) grouped.set(claim.property, [...(grouped.get(claim.property) || []), claim]);
   const resolved = {};
+  const resolutions = {};
   const conflicts = [];
   for (const [property, propertyClaims] of [...grouped.entries()].sort(([left], [right]) => left.localeCompare(right))) {
     const ordered = propertyClaims.slice().sort((left, right) =>
       evidenceRank(left.evidenceClass) - evidenceRank(right.evidenceClass) ||
-      String(right.sourceUpdatedAt || right.validAt).localeCompare(String(left.sourceUpdatedAt || left.validAt)) ||
+      String(right.sourceUpdatedAt || right.validAt || right.observedAt).localeCompare(String(left.sourceUpdatedAt || left.validAt || left.observedAt)) ||
       left.id.localeCompare(right.id));
     resolved[property] = ordered[0]?.value;
+    resolutions[property] = {
+      selectedClaimId: ordered[0]?.id || null,
+      evidenceClass: ordered[0]?.evidenceClass || 'UNKNOWN',
+      reason: ordered.length === 1
+        ? 'only-available-claim'
+        : 'strongest-evidence-then-newest-explicit-source-time-then-stable-id',
+      alternativeClaimIds: ordered.slice(1).map((claim) => claim.id)
+    };
     const directValues = new Map();
     for (const claim of ordered.filter((item) => item.evidenceClass === 'DIRECT_SOURCE')) {
       const key = JSON.stringify(claim.value);
@@ -114,5 +123,5 @@ export function resolveClaims(claims = []) {
     }
     if (directValues.size > 1) conflicts.push(deepFreeze({ property, claimIds: [...directValues.values()].flat().sort() }));
   }
-  return deepFreeze({ resolved, conflicts });
+  return deepFreeze({ resolved, resolutions, conflicts });
 }

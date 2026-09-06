@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "library-1",
+      "geometry": { "type": "Point", "coordinates": [-76.6124, 39.2905] },
+      "properties": { "name": "Example Library", "kind": "library" }
+    },
+    {
+      "type": "Feature",
+      "id": "cafe-1",
+      "geometry": { "type": "Point", "coordinates": [-76.6117, 39.2902] },
+      "properties": { "name": "Example Cafe", "kind": "cafe" }
+    }
+  ]
+}

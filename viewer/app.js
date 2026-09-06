@@ -58,6 +58,7 @@ function geometryElement(geometry, project, attributes) {
   if (geometry.type === 'MultiPoint') return geometry.coordinates.map((point) => geometryElement({ type: 'Point', coordinates: point }, project, attributes)).join('');
   if (geometry.type === 'MultiLineString') return geometry.coordinates.map((part) => geometryElement({ type: 'LineString', coordinates: part }, project, attributes)).join('');
   if (geometry.type === 'MultiPolygon') return geometry.coordinates.map((part) => geometryElement({ type: 'Polygon', coordinates: part }, project, attributes)).join('');
+  if (geometry.type === 'GeometryCollection') return geometry.geometries.map((part) => geometryElement(part, project, attributes)).join('');
   return '';
 }
 
@@ -73,6 +74,7 @@ function geometryAnchor(geometry, project) {
   const nested = geometry.type === 'MultiPoint' ? { type: 'Point', coordinates: geometry.coordinates[0] }
     : geometry.type === 'MultiLineString' ? { type: 'LineString', coordinates: geometry.coordinates[0] }
       : geometry.type === 'MultiPolygon' ? { type: 'Polygon', coordinates: geometry.coordinates[0] } : null;
+  if (geometry.type === 'GeometryCollection') return geometry.geometries.length ? geometryAnchor(geometry.geometries[0], project) : null;
   return nested ? geometryAnchor(nested, project) : null;
 }
 
@@ -173,18 +175,25 @@ function renderEvidence(data, entity) {
 function renderDecision(data, entity) {
   const records = entityRecords(data, entity);
   const sharedGers = records.length > 1 && records.every((record) => record.gersId) && new Set(records.map((record) => record.gersId)).size === 1;
-  const verdict = records.length > 1 ? 'MATCH' : 'NO MERGE NEEDED';
-  const explanation = sharedGers
-    ? `The ${records.length} source records share the stable GERS identifier “${escapeHtml(records[0].gersId)}”. That explicit identity is sufficient to group them while keeping both records.`
-    : 'This entity comes from one source record. No cross-source identity decision was required.';
-  const reasons = sharedGers
+  const ids = new Set(records.map((record) => record.id));
+  const decision = data.snapshot.reconciliations.flatMap((result) => result.decisions || []).find((item) => ids.has(item.sourceId) || ids.has(item.matchedId));
+  const verdict = decision?.decision || (records.length > 1 ? 'MATCH' : 'NO MERGE NEEDED');
+  const features = decision?.candidates?.[0]?.features;
+  const explanation = decision
+    ? `The recorded matcher decision is ${escapeHtml(decision.decision)}: ${escapeHtml(decision.reason.replaceAll('-', ' '))}. The decision object and its measured signals remain in the snapshot.`
+    : sharedGers
+      ? `The ${records.length} source records share the stable GERS identifier “${escapeHtml(records[0].gersId)}”. That explicit identity is sufficient to group them while keeping both records.`
+      : 'This entity comes from one source record. No cross-source identity decision was required.';
+  const signalRows = features ? Object.entries(features).filter(([, value]) => value != null).map(([key, value]) => `<li>${escapeHtml(key)}: ${escapeHtml(typeof value === 'number' ? Number(value.toFixed(4)) : value)}</li>`).join('') : '';
+  const reasons = signalRows || (sharedGers
     ? '<li>Entity type agrees: building</li><li>Stable cross-source identifier agrees</li><li>Normalized footprints coincide</li><li>Conflicting height does not negate identity</li>'
-    : '<li>Source identity remains available as an alias</li><li>No unrelated nearby record was forced into this entity</li>';
+    : '<li>Source identity remains available as an alias</li><li>No unrelated nearby record was forced into this entity</li>');
   const relationships = entity.relationships.map((relationship) => {
     const target = data.snapshot.entities.find((candidate) => candidate.id === relationship.targetId);
     return `<div class="relationship-row"><strong>${escapeHtml(relationship.type.replaceAll('_', ' '))}</strong><small>${escapeHtml(relationship.method)} · ${escapeHtml(evidenceLabels[relationship.evidenceClass] || relationship.evidenceClass)}</small>${target ? `<button type="button" data-related-id="${escapeHtml(target.id)}">Inspect ${escapeHtml(displayName(target))} →</button>` : ''}</div>`;
   }).join('') || '<p class="empty-note">No derived relationships for this entity.</p>';
-  return `${entityHeader(entity)}<div class="decision-box"><strong>${verdict}</strong><p>${explanation}</p><ul class="reason-list">${reasons}</ul></div><div class="detail-block"><h3>Relationships</h3>${relationships}</div><div class="detail-block"><h3>Temporal status</h3><p class="summary-note">Revision ${entity.lifecycle.revision}. Evidence dates are shown claim by claim; absence is never treated as deletion.</p></div>`;
+  const selections = Object.entries(entity.resolution || {}).map(([property, resolution]) => `<div class="property-row"><span>${escapeHtml(property)}</span><strong>${escapeHtml(resolution.reason.replaceAll('-', ' '))}</strong></div>`).join('');
+  return `${entityHeader(entity)}<div class="decision-box"><strong>${verdict}</strong><p>${explanation}</p><ul class="reason-list">${reasons}</ul></div><div class="detail-block"><h3>Property selection</h3>${selections || '<p class="empty-note">No property selection was required.</p>'}</div><div class="detail-block"><h3>Relationships</h3>${relationships}</div><div class="detail-block"><h3>Temporal state</h3><p class="summary-note">Revision ${entity.lifecycle.revision}. Evidence dates are shown claim by claim; missing dates and absent records are never interpreted as deletion.</p></div>`;
 }
 
 function renderJson(data, entity) {
@@ -192,7 +201,10 @@ function renderJson(data, entity) {
   const claims = data.snapshot.claims.filter((claim) => claimSet.has(claim.id));
   const provenanceIds = new Set(claims.map((claim) => claim.provenanceId));
   const provenance = data.snapshot.provenance.filter((record) => provenanceIds.has(record.id));
-  return `${entityHeader(entity)}<p class="summary-note">This is the real neutral structure used by the demo, trimmed to the selected entity and its evidence.</p><pre class="json-view"><code>${escapeHtml(JSON.stringify({ entity, claims, provenance }, null, 2))}</code></pre>`;
+  const sourceRecords = entityRecords(data, entity);
+  const ids = new Set(sourceRecords.map((record) => record.id));
+  const reconciliation = data.snapshot.reconciliations.flatMap((result) => result.decisions || []).filter((decision) => ids.has(decision.sourceId) || ids.has(decision.matchedId));
+  return `${entityHeader(entity)}<p class="summary-note">This is the real neutral structure used by the demo, trimmed to the selected entity and its evidence.</p><pre class="json-view"><code>${escapeHtml(JSON.stringify({ entity, sourceRecords, claims, provenance, reconciliation }, null, 2))}</code></pre>`;
 }
 
 function renderEntity(data) {
@@ -214,9 +226,11 @@ function renderDecisionStory(data) {
   const marker = document.querySelector('.decision-marker');
   const path = document.querySelector('.decision-path');
   if (records.length > 1) {
+    const ids = new Set(records.map((record) => record.id));
+    const decision = data.snapshot.reconciliations.flatMap((result) => result.decisions || []).find((item) => ids.has(item.sourceId) || ids.has(item.matchedId));
     marker.textContent = 'MATCH';
     document.querySelector('#decision-title').textContent = `${records.length} source records, one defensible identity.`;
-    document.querySelector('#decision-copy').textContent = 'The records share a stable GERS identifier. The engine groups their identity but keeps every source claim—including the height disagreement.';
+    document.querySelector('#decision-copy').textContent = decision ? `Recorded reason: ${decision.reason.replaceAll('-', ' ')}. The engine groups identity but keeps every source claim—including the height disagreement.` : 'The records share a stable GERS identifier. The engine groups their identity but keeps every source claim—including the height disagreement.';
     path.innerHTML = `<span>${escapeHtml(records[0].sourceId)}</span><i>+</i><span>${escapeHtml(records[1].sourceId)}</span><b>→</b><strong>${escapeHtml(displayName(entity))}</strong>`;
   } else {
     marker.textContent = 'KEEP';

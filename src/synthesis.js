@@ -5,6 +5,7 @@ import { attributionSummary } from './attribution.js';
 import { canonicalJson, deepFreeze, stableHash } from './stable.js';
 import { failedProviderResult, queryProvider, validateBounds } from './provider.js';
 import { SynthesisError } from './errors.js';
+import { reconcileEntities } from './entity-reconciliation.js';
 
 export const SYNTHESIS_VERSION = 1;
 export const OUTPUT_SCHEMA_VERSION = 1;
@@ -92,6 +93,7 @@ export function synthesizeWorld(input = {}) {
       geometrySourceId: geometryRecord?.id || null,
       claimIds: entityClaims.map((claim) => claim.id).sort(),
       resolved: resolution.resolved,
+      resolution: resolution.resolutions,
       conflicts: resolution.conflicts,
       relationships: [],
       lifecycle: { revision: SYNTHESIS_VERSION },
@@ -125,6 +127,7 @@ export function synthesizeWorld(input = {}) {
     schemaVersion: OUTPUT_SCHEMA_VERSION,
     synthesisVersion: SYNTHESIS_VERSION,
     entities,
+    sourceRecords: records,
     claims,
     provenance,
     providerSummary,
@@ -134,11 +137,13 @@ export function synthesizeWorld(input = {}) {
   const attributions = attributionSummary(provenance);
   const fingerprint = stableHash({
     ...partial,
+    sourceRecords: records.map(({ provenance: { retrievedAt: _retrievedAt, ...recordProvenance }, ...record }) => ({ ...record, provenance: recordProvenance })),
+    reconciliations: partial.reconciliations.map(({ metrics, ...reconciliation }) => reconciliation),
     claims: claims.map(({ retrievedAt, ...claim }) => claim),
     provenance: provenance.map(({ retrievedAt, ...record }) => record),
     providerSummary: providerSummary.map(({ metrics, ...value }) => value)
   });
-  return deepFreeze({ ...partial, coverage, attributions, fingerprint, canonicalBytes: canonicalJson({ entities, claims, provenance }).length });
+  return deepFreeze({ ...partial, coverage, attributions, fingerprint, canonicalBytes: canonicalJson({ entities, sourceRecords: records, claims, provenance }).length });
 }
 
 function linkedAbortController(signal, timeoutMs) {
@@ -168,7 +173,7 @@ export async function synthesize(options = {}) {
     ? providers.filter((provider) => provider.capabilities.some((capability) => requestedCapabilities.includes(capability)))
     : providers;
   if (!selectedProviders.length) throw new SynthesisError('No provider supports the requested capabilities.', { code: 'NO_CAPABLE_PROVIDER' });
-  const providerResults = await Promise.all(selectedProviders.map(async (provider) => {
+  const providerResults = (await Promise.all(selectedProviders.map(async (provider) => {
     const startedAt = performance.now();
     const linked = linkedAbortController(options.signal, limits.providerTimeoutMs);
     try {
@@ -185,7 +190,15 @@ export async function synthesize(options = {}) {
     } finally {
       linked.release();
     }
-  }));
-  const snapshot = synthesizeWorld({ providerResults, reconciliations: options.reconciliations || [] });
+  }))).sort((left, right) => left.providerId.localeCompare(right.providerId));
+  const reconciliations = [...(options.reconciliations || [])];
+  if (options.reconciliation?.enabled === true) {
+    for (let leftIndex = 0; leftIndex < providerResults.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < providerResults.length; rightIndex += 1) {
+        reconciliations.push(reconcileEntities(providerResults[leftIndex].records, providerResults[rightIndex].records, options.reconciliation));
+      }
+    }
+  }
+  const snapshot = synthesizeWorld({ providerResults, reconciliations });
   return deepFreeze({ ...snapshot, request: { bounds, requestedCapabilities, limits } });
 }

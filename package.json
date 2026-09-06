@@ -1,6 +1,6 @@
 {
   "name": "geospatial-world-synthesis",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Renderer-neutral geospatial synthesis with canonical entities, provenance, conflicts, and neutral exports.",
   "type": "module",
   "license": "MIT",
@@ -33,6 +33,10 @@
       "types": "./src/providers/index.d.ts",
       "import": "./src/providers/index.js"
     },
+    "./node": {
+      "types": "./src/node/index.d.ts",
+      "import": "./src/node/index.js"
+    },
     "./schemas/*": "./schemas/*",
     "./package.json": "./package.json"
   },
@@ -50,7 +54,7 @@
   "scripts": {
     "build": "node scripts/build-viewer.mjs",
     "check": "node scripts/check-source.mjs",
-    "check:types": "tsc --noEmit --strict --lib ES2023,DOM src/index.d.ts src/providers/index.d.ts",
+    "check:types": "tsc --noEmit --strict --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM src/index.d.ts src/providers/index.d.ts src/node/index.d.ts test/types-consumer.ts",
     "test": "node --test test/*.test.js",
     "test:browser": "node scripts/test-browser.mjs",
     "test:consumer": "node scripts/test-consumer.mjs",
@@ -59,19 +63,32 @@
     "example:provider": "node examples/custom-provider/run.mjs",
     "example:temporal": "node examples/temporal-evidence/run.mjs",
     "example:export": "node examples/export/run.mjs",
+    "example:config": "node bin/gws.js synthesize examples/config-workflow/workflow.json --output output/config-workflow",
+    "example:osm": "node examples/openstreetmap/run.mjs",
+    "example:overture-osm": "node examples/overture-osm/run.mjs",
+    "example:arcgis": "node examples/arcgis-government/run.mjs",
+    "example:incremental": "node examples/incremental-update/run.mjs",
+    "example:postgis": "node examples/postgis/run.mjs",
     "benchmark": "node scripts/benchmark.mjs",
+    "benchmark:scale": "node scripts/benchmark.mjs 10000 && node scripts/benchmark.mjs 100000",
+    "evaluate:reconciliation": "node scripts/evaluate-reconciliation.mjs",
+    "evaluate:live": "node scripts/evaluate-live-overture-osm.mjs",
     "validate:package": "node scripts/validate-package.mjs",
     "validate:docs": "node scripts/validate-docs.mjs",
-    "validate:release": "npm run check && npm run check:types && npm test && npm run build && npm run test:browser && npm run test:consumer && npm run example && npm run example:reconciliation && npm run example:provider && npm run example:temporal && npm run example:export && npm run benchmark && npm run validate:package && npm run validate:docs",
+    "validate:release": "npm run check && npm run check:types && npm test && npm audit --omit=dev && npm run build && npm run test:browser && npm run test:consumer && npm run example && npm run example:reconciliation && npm run example:provider && npm run example:temporal && npm run example:export && npm run example:config && npm run example:incremental && npm run benchmark && npm run evaluate:reconciliation && npm run validate:package && npm run validate:docs",
     "viewer": "node scripts/serve-viewer.mjs"
   },
   "dependencies": {
+    "fast-xml-parser": "^5.11.1",
+    "flatgeobuf": "^4.4.0",
     "polygon-clipping": "0.15.7",
-    "proj4": "2.22.0"
+    "proj4": "2.22.0",
+    "rbush": "^4.0.1"
   },
   "devDependencies": {
     "ajv": "8.20.0",
     "esbuild": "0.28.2",
+    "pg": "^8.23.0",
     "playwright": "1.63.0",
     "typescript": "7.0.2",
     "yaml": "2.9.0"

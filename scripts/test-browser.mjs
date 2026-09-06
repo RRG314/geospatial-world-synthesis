@@ -17,6 +17,7 @@ try {
   if (await page.title() !== 'Geospatial World Synthesis — evidence viewer') throw new Error('Unexpected viewer title.');
   if (!await page.getByRole('heading', { name: 'See what the map knows—and where its sources disagree.' }).isVisible()) throw new Error('Viewer did not render the public introduction.');
   if (await page.locator('#entity-count').textContent() !== '4') throw new Error('Viewer did not render four entities.');
+  if (!await page.getByRole('heading', { name: 'Use the same core with real bounded data.' }).isVisible()) throw new Error('Viewer did not render the public capability guide.');
   await page.getByRole('button', { name: /Compare sources/ }).click();
   if (await page.locator('[data-layer="canonical"]').getAttribute('aria-pressed') !== 'false') throw new Error('Guided source comparison did not hide canonical output.');
   if (await page.getByRole('tab', { name: 'Evidence' }).getAttribute('aria-selected') !== 'true') throw new Error('Guided source comparison did not open evidence.');
@@ -28,7 +29,7 @@ try {
   if (await page.locator('[data-layer="height-survey"]').getAttribute('aria-pressed') !== 'true') throw new Error('Layer control interaction failed.');
   await page.getByRole('tab', { name: 'JSON' }).click();
   if (!await page.locator('.json-view').isVisible()) throw new Error('Raw JSON inspection failed.');
-  for (const path of ['/data/world.json', '/data/world.geojson', '/assets/social-preview.png']) {
+  for (const path of ['/data/world.json', '/data/world.geojson', '/data/world.fgb', '/data/world.prov.json', '/assets/social-preview.png']) {
     const response = await page.request.get(`http://127.0.0.1:${port}${path}`);
     if (!response.ok()) throw new Error(`Viewer asset failed: ${path}`);
   }

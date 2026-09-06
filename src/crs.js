@@ -34,17 +34,18 @@ function transformCoordinates(value, transformer, state, maxCoordinates) {
 }
 
 export function transformGeometry(geometry, sourceCrs, outputCrs = 'OGC:CRS84', options = {}) {
-  if (!geometry?.type || !Array.isArray(geometry.coordinates)) throw new TypeError('A GeoJSON geometry is required.');
+  if (!geometry?.type || geometry.type !== 'GeometryCollection' && !Array.isArray(geometry.coordinates)) throw new TypeError('A GeoJSON geometry is required.');
   const source = String(sourceCrs || '').trim().toUpperCase();
   const output = String(outputCrs || '').trim().toUpperCase();
   if (!knownCrs(source)) throw new Error(`Unknown source CRS: ${source || 'missing'}. Register it with registerCrs() before synthesis.`);
   if (!knownCrs(output)) throw new Error(`Unknown output CRS: ${output || 'missing'}.`);
   const maxCoordinates = Math.max(1, Number(options.maxCoordinates) || 100000);
   const transformer = proj4(source, output);
-  const transformed = {
-    ...geometry,
-    coordinates: transformCoordinates(geometry.coordinates, transformer, { count: 0 }, maxCoordinates)
-  };
+  const state = { count: 0 };
+  const transformPart = (part) => part.type === 'GeometryCollection'
+    ? { ...part, geometries: (part.geometries || []).map(transformPart) }
+    : { ...part, coordinates: transformCoordinates(part.coordinates, transformer, state, maxCoordinates) };
+  const transformed = transformPart(geometry);
   return deepFreeze(transformed);
 }
 

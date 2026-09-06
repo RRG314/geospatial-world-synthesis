@@ -1,14 +1,16 @@
 export { SynthesisError, ProviderError } from './errors.js';
 export { canonicalJson, stableHash } from './stable.js';
 export { registerCrs, knownCrs, transformGeometry, crsSnapshot } from './crs.js';
-export { validateGeometry, geometryBbox, geometryCentroid, polygonIou, distanceMeters, SUPPORTED_GEOMETRY_TYPES } from './geometry.js';
+export { validateGeometry, geometryBbox, geometryCentroid, geometryArea, geodesicAreaSquareMeters, polygonIou, distanceMeters, SUPPORTED_GEOMETRY_TYPES } from './geometry.js';
 export { EVIDENCE_CLASSES, createClaim, createProvenance, resolveClaims } from './evidence.js';
 export { ENTITY_TYPES, PROVIDER_STATUSES, defineProvider, normalizeSourceRecord, queryProvider, validateBounds } from './provider.js';
 export { DEFAULT_BUILDING_MATCH_POLICY, buildingMatchFeatures, reconcileBuildings, reconcileBuildingRelationship } from './reconciliation.js';
+export { DEFAULT_ENTITY_MATCH_POLICIES, RECONCILABLE_ENTITY_TYPES, entityMatchFeatures, reconcileEntities } from './entity-reconciliation.js';
 export { assessTemporalEvidence, TEMPORAL_STATUSES } from './temporal.js';
 export { resolveRepresentation } from './representation.js';
 export { attributionSummary } from './attribution.js';
 export { synthesize, synthesizeWorld, SYNTHESIS_VERSION, OUTPUT_SCHEMA_VERSION } from './synthesis.js';
 export { inspectEntity } from './inspect.js';
-export { toCanonicalJson, toGeoJson } from './exporters.js';
+export { toCanonicalJson, toGeoJson, toFlatGeobuf, toProvJson } from './exporters.js';
+export { diffSnapshots } from './diff.js';
 export { createLocalProvider } from './providers/local.js';

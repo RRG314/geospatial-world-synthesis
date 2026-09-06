@@ -1,29 +1,49 @@
 import { performance } from 'node:perf_hooks';
-import { createLocalProvider, synthesize } from 'geospatial-world-synthesis';
+import { reconcileEntities } from 'geospatial-world-synthesis';
 
-const count = Math.max(100, Math.min(10000, Number(process.argv[2]) || 2000));
-const records = Array.from({ length: count }, (_, index) => ({
-  sourceId: `poi-${index}`,
+const count = Math.max(100, Math.min(1_000_000, Number(process.argv[2]) || 10_000));
+const columns = Math.ceil(Math.sqrt(count));
+const record = (prefix, index, offset = 0) => ({
+  id: `${prefix}-${index}`,
+  sourceId: `${prefix}-${index}`,
+  providerId: prefix,
   entityType: 'poi',
-  geometry: { type: 'Point', coordinates: [-76.62 + (index % 100) * 0.0001, 39.28 + Math.floor(index / 100) * 0.0001] },
-  properties: { name: `Fixture ${index}`, category: index % 2 ? 'odd' : 'even' },
-  evidenceClass: 'DIRECT_SOURCE'
-}));
-const provider = createLocalProvider({
-  id: 'benchmark-fixture', records, sourceCrs: 'OGC:CRS84', licenseId: 'CC0-1.0', attribution: 'Generated benchmark fixture — CC0-1.0'
+  geometry: { type: 'Point', coordinates: [-120 + index % columns * 0.001 + offset, 30 + Math.floor(index / columns) * 0.001] },
+  properties: { name: `Place ${index}`, category: index % 3 === 0 ? 'library' : 'shop' }
 });
-const samples = [];
-let snapshot;
-for (let index = 0; index < 5; index += 1) {
-  const started = performance.now();
-  snapshot = await synthesize({ bounds: [-76.63, 39.27, -76.60, 39.32], providers: [provider], limits: { maxRecordsPerProvider: count } });
-  samples.push(performance.now() - started);
-}
-samples.sort((left, right) => left - right);
+
+const baselineMemory = process.memoryUsage().rss;
+const left = Array.from({ length: count }, (_, index) => record('left', index));
+const right = Array.from({ length: count }, (_, index) => record('right', index, 0.00001));
+const startedAt = performance.now();
+const result = reconcileEntities(left, right, { maxReportedCandidates: 1 });
+const elapsedMs = performance.now() - startedAt;
+const matches = result.counts.MATCH;
+const falseMerges = result.decisions.filter((decision) => decision.decision === 'MATCH' && Number(decision.sourceId.split('-').at(-1)) !== Number(decision.matchedId.split('-').at(-1))).length;
+const precision = matches ? (matches - falseMerges) / matches : 0;
+const recall = (matches - falseMerges) / count;
+const maxRssBytes = process.resourceUsage().maxRSS * 1024;
+
 console.log(JSON.stringify({
-  fixture: 'generated-points', records: count, iterations: samples.length,
-  medianMs: Number(samples[Math.floor(samples.length / 2)].toFixed(2)),
-  minMs: Number(samples[0].toFixed(2)), maxMs: Number(samples.at(-1).toFixed(2)),
-  entityCount: snapshot.entities.length, claimCount: snapshot.claims.length,
-  note: 'Synthetic fixture throughput; not real-world accuracy or provider-network performance.'
+  fixture: 'deterministic-grid-poi-pairs',
+  license: 'CC0-1.0',
+  recordsPerSource: count,
+  totalInputRecords: count * 2,
+  reconciliationMs: Number(elapsedMs.toFixed(2)),
+  recordsPerSecond: Math.round(count / (elapsedMs / 1000)),
+  candidateCount: result.metrics.candidateCount,
+  allPairsCandidateCount: count * count,
+  candidateReduction: Number((1 - result.metrics.candidateCount / (count * count)).toFixed(8)),
+  matches,
+  ambiguous: result.counts.AMBIGUOUS,
+  noMatch: result.counts.NO_MATCH,
+  falseMerges,
+  precision: Number(precision.toFixed(6)),
+  recall: Number(recall.toFixed(6)),
+  f1: precision + recall ? Number((2 * precision * recall / (precision + recall)).toFixed(6)) : 0,
+  rssGrowthBytes: Math.max(0, process.memoryUsage().rss - baselineMemory),
+  maxRssBytes,
+  decisionJsonBytes: Buffer.byteLength(JSON.stringify(result)),
+  index: result.metrics.index,
+  limitations: 'Generated point-pair throughput and known-correspondence accuracy; excludes provider I/O, polygons, and messy real-world labels.'
 }, null, 2));

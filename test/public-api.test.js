@@ -1,16 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { deserialize as deserializeFlatGeobuf } from 'flatgeobuf/lib/mjs/geojson.js';
 import {
   assessTemporalEvidence,
   createLocalProvider,
+  diffSnapshots,
+  geodesicAreaSquareMeters,
   inspectEntity,
   queryProvider,
+  reconcileEntities,
   reconcileBuildingRelationship,
   reconcileBuildings,
   synthesize,
   synthesizeWorld,
   toCanonicalJson,
+  toFlatGeobuf,
   toGeoJson,
+  toProvJson,
   transformGeometry,
   validateGeometry
 } from 'geospatial-world-synthesis';
@@ -52,17 +58,35 @@ test('canonical fingerprint ignores provider order and retrieval time', async ()
   assert.equal(forward.fingerprint, synthesizeWorld({ providerResults: [laterFirst, second] }).fingerprint);
 });
 
+test('snapshots retain normalized source records and expose affected-entity diffs', async () => {
+  const before = await synthesize({ bounds, providers: [local('changing', [{
+    sourceId: 'one', entityType: 'poi', geometry: { type: 'Point', coordinates: [-76.61, 39.29] }, properties: { name: 'Old name' }
+  }])] });
+  const after = await synthesize({ bounds, providers: [local('changing', [{
+    sourceId: 'one', entityType: 'poi', geometry: { type: 'Point', coordinates: [-76.61, 39.29] }, properties: { name: 'New name' }
+  }])] });
+  assert.equal(before.sourceRecords[0].sourceId, 'one');
+  const diff = diffSnapshots(before, after);
+  assert.equal(diff.changed, true);
+  assert.deepEqual(diff.sourceRecords.changed, ['source:changing:one']);
+  assert.deepEqual(diff.entities.changed, [before.entities[0].id]);
+  assert.deepEqual(diff.affectedEntityIds, [before.entities[0].id]);
+});
+
 test('retains conflicting direct claims and their provenance', async () => {
   const geometry = rectangle(-76.612, 39.289, -76.611, 39.290);
   const providers = [
-    local('a', [{ sourceId: 'a1', entityType: 'building', gersId: 'same', geometry, properties: { height: 10 }, evidenceClass: 'DIRECT_SOURCE' }]),
-    local('b', [{ sourceId: 'b1', entityType: 'building', gersId: 'same', geometry, properties: { height: 12 }, evidenceClass: 'DIRECT_SOURCE' }])
+    local('a', [{ sourceId: 'a1', entityType: 'building', gersId: 'same', geometry, properties: { height: 10 }, observedAt: '2026-01-01T00:00:00Z', evidenceClass: 'DIRECT_SOURCE' }]),
+    local('b', [{ sourceId: 'b1', entityType: 'building', gersId: 'same', geometry, properties: { height: 12 }, observedAt: '2026-02-01T00:00:00Z', evidenceClass: 'DIRECT_SOURCE' }])
   ];
   const result = await synthesize({ bounds, providers });
   const inspection = inspectEntity(result, result.entities[0].id);
   assert.equal(inspection.conflicts[0].property, 'height');
   assert.deepEqual(inspection.claims.filter((claim) => claim.property === 'height').map((claim) => claim.value).sort(), [10, 12]);
   assert.equal(inspection.provenance.length, 2);
+  assert.equal(inspection.sourceRecords.length, 2);
+  assert.equal(result.entities[0].resolved.height, 12);
+  assert.match(inspection.propertySelections.height.reason, /strongest-evidence/);
 });
 
 test('does not force an ambiguous building merge', async () => {
@@ -75,6 +99,65 @@ test('does not force an ambiguous building merge', async () => {
   const reconciliation = reconcileBuildings(left.records, right.records);
   assert.equal(reconciliation.decisions[0].decision, 'AMBIGUOUS');
   assert.equal(synthesizeWorld({ providerResults: [left, right], reconciliations: [reconciliation] }).entities.length, 3);
+});
+
+test('generalized reconciliation handles POIs, addresses, parcels, and roads with inspectable scores', () => {
+  const point = (id, entityType, coordinates, properties) => ({ id, entityType, geometry: { type: 'Point', coordinates }, properties });
+  const cases = [
+    [point('left-poi', 'poi', [0, 0], { name: 'Central Library', category: 'library' }), point('right-poi', 'poi', [0.00001, 0], { name: 'Central Library', category: 'library' })],
+    [point('left-address', 'address', [0, 0], { address: '10 Main Street' }), point('right-address', 'address', [0.00001, 0], { address: '10 Main Street' })],
+    [{ id: 'left-parcel', entityType: 'parcel', geometry: rectangle(0, 0, 0.001, 0.001), properties: {} }, { id: 'right-parcel', entityType: 'parcel', geometry: rectangle(0, 0, 0.001, 0.001), properties: {} }],
+    [{ id: 'left-road', entityType: 'road', geometry: { type: 'LineString', coordinates: [[0, 0], [0.001, 0]] }, properties: { name: 'Main Street', class: 'residential' } }, { id: 'right-road', entityType: 'road', geometry: { type: 'LineString', coordinates: [[0, 0], [0.001, 0]] }, properties: { name: 'Main Street', class: 'residential' } }]
+  ];
+  for (const [left, right] of cases) {
+    const result = reconcileEntities([left], [right]);
+    assert.equal(result.decisions[0].decision, 'MATCH');
+    assert.equal(result.decisions[0].matchedId, right.id);
+    assert.ok(result.decisions[0].candidates[0].features.score >= 0.76);
+  }
+});
+
+test('generalized reconciliation preserves ambiguity and uses a spatial candidate index', () => {
+  const left = { id: 'left', entityType: 'poi', geometry: { type: 'Point', coordinates: [0, 0] }, properties: { name: 'Cafe' } };
+  const right = ['a', 'b'].map((id) => ({ id, entityType: 'poi', geometry: { type: 'Point', coordinates: [0, 0] }, properties: { name: 'Cafe' } }));
+  assert.equal(reconcileEntities([left], right).decisions[0].decision, 'AMBIGUOUS');
+  const manyLeft = Array.from({ length: 1000 }, (_, index) => ({ id: `l${index}`, entityType: 'poi', geometry: { type: 'Point', coordinates: [index * 0.01, 0] }, properties: { name: `Place ${index}` } }));
+  const manyRight = Array.from({ length: 1000 }, (_, index) => ({ id: `r${index}`, entityType: 'poi', geometry: { type: 'Point', coordinates: [index * 0.01, 0] }, properties: { name: `Place ${index}` } }));
+  const indexed = reconcileEntities(manyLeft, manyRight);
+  assert.ok(indexed.metrics.candidateCount < 5000, `expected fewer than 5000 candidates, received ${indexed.metrics.candidateCount}`);
+  assert.equal(indexed.metrics.index, 'rbush-4');
+});
+
+test('generalized reconciliation does not auto-merge a many-to-one target collision', () => {
+  const left = ['a', 'b'].map((id) => ({
+    id: `left-${id}`, entityType: 'poi', geometry: { type: 'Point', coordinates: [0, 0] }, properties: { name: 'Shared Cafe', category: 'cafe' }
+  }));
+  const right = [{ id: 'right', entityType: 'poi', geometry: { type: 'Point', coordinates: [0, 0] }, properties: { name: 'Shared Cafe', category: 'cafe' } }];
+  const result = reconcileEntities(left, right);
+  assert.equal(result.counts.MATCH, 0);
+  assert.equal(result.counts.AMBIGUOUS, 2);
+  assert.ok(result.decisions.every((decision) => decision.reason === 'many-to-one-candidate-requires-review'));
+});
+
+test('building reconciliation safely rejects non-polygon building geometry', () => {
+  const polygon = { id: 'polygon', entityType: 'building', geometry: rectangle(0, 0, 0.001, 0.001), properties: {} };
+  const point = { id: 'point', entityType: 'building', geometry: { type: 'Point', coordinates: [0.0005, 0.0005] }, properties: {} };
+  const result = reconcileEntities([point], [polygon]);
+  assert.equal(result.decisions[0].decision, 'NO_MATCH');
+  assert.equal(result.decisions[0].reason, 'candidate-below-policy-threshold');
+  assert.equal(result.decisions[0].candidates[0].features.score, 0);
+});
+
+test('automatic reconciliation merges only accepted cross-provider matches deterministically', async () => {
+  const providers = [
+    local('left-pois', [{ sourceId: 'one', entityType: 'poi', geometry: { type: 'Point', coordinates: [-76.61, 39.29] }, properties: { name: 'Central Library', category: 'library' } }]),
+    local('right-pois', [{ sourceId: 'other', entityType: 'poi', geometry: { type: 'Point', coordinates: [-76.60999, 39.29] }, properties: { name: 'Central Library', category: 'library' } }])
+  ];
+  const first = await synthesize({ bounds, providers, reconciliation: { enabled: true } });
+  const second = await synthesize({ bounds, providers: providers.reverse(), reconciliation: { enabled: true } });
+  assert.equal(first.entities.length, 1);
+  assert.equal(first.reconciliations[0].counts.MATCH, 1);
+  assert.equal(first.fingerprint, second.fingerprint);
 });
 
 test('represents one-to-many, many-to-one, and building-part relationships', async () => {
@@ -104,6 +187,27 @@ test('rejects malformed, unsupported, and over-limit geometry', () => {
   assert.equal(validateGeometry({ type: 'Point', coordinates: [Number.NaN, 1] }).valid, false);
   assert.equal(validateGeometry({ type: 'LineString', coordinates: [[0, 0]] }).valid, false);
   assert.equal(validateGeometry({ type: 'LineString', coordinates: [[0, 0], [1, 1]] }, { maxCoordinates: 1 }).valid, false);
+});
+
+test('validates topology, retains antimeridian diagnostics, and measures geodesic area', () => {
+  const withHole = {
+    type: 'Polygon',
+    coordinates: [
+      [[0, 0], [0.01, 0], [0.01, 0.01], [0, 0.01], [0, 0]],
+      [[0.002, 0.002], [0.004, 0.002], [0.004, 0.004], [0.002, 0.004], [0.002, 0.002]]
+    ]
+  };
+  assert.equal(validateGeometry(withHole).valid, true);
+  assert.ok(geodesicAreaSquareMeters(withHole) > 1_000_000);
+  const bowtie = { type: 'Polygon', coordinates: [[[0, 0], [1, 1], [1, 0], [0, 1], [0, 0]]] };
+  assert.equal(validateGeometry(bowtie).valid, false);
+  assert.ok(validateGeometry(bowtie).warnings.includes('polygon-ring-self-intersection'));
+  const crossing = { type: 'LineString', coordinates: [[179.9, 0], [-179.9, 0]] };
+  assert.equal(validateGeometry(crossing).valid, true);
+  assert.ok(validateGeometry(crossing).warnings.includes('antimeridian-crossing-not-cut'));
+  const collection = { type: 'GeometryCollection', geometries: [{ type: 'Point', coordinates: [0, 0] }, crossing] };
+  assert.equal(validateGeometry(collection).valid, true);
+  assert.equal(validateGeometry(collection).coordinateCount, 3);
 });
 
 test('derives building-parcel and POI-building relationships', async () => {
@@ -152,6 +256,15 @@ test('canonical JSON and GeoJSON exports are independently parseable', async () 
   assert.equal(geojson.type, 'FeatureCollection');
   assert.equal(geojson.features[0].type, 'Feature');
   assert.equal(geojson['gws:attributions'][0].providerId, 'export');
+  const flatGeobuf = toFlatGeobuf(result);
+  assert.ok(flatGeobuf.byteLength > 100);
+  const decoded = [];
+  for await (const feature of deserializeFlatGeobuf(flatGeobuf)) decoded.push(feature);
+  assert.equal(decoded.length, 1);
+  assert.equal(decoded[0].properties.name, 'Exported');
+  const prov = toProvJson(result);
+  assert.equal(Object.keys(prov.wasDerivedFrom).length, 1);
+  assert.equal(Object.keys(prov.agent).length, 1);
 });
 
 test('resource limits are enforced before unbounded provider use', async () => {

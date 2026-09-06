@@ -20,6 +20,7 @@
     <a class="wordmark" href="#top" aria-label="Geospatial World Synthesis home"><span>GWS</span><b>Geospatial World Synthesis</b></a>
     <div class="nav-links">
       <a href="#inspector">Live demo</a>
+      <a href="#capabilities">Capabilities</a>
       <a href="#install">Install</a>
       <a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/docs/api.md">API</a>
       <a class="github-link" href="https://github.com/RRG314/geospatial-world-synthesis">GitHub ↗</a>
@@ -28,7 +29,7 @@
 
   <header class="masthead" id="top">
     <div class="hero-copy">
-      <p class="eyebrow">OPEN-SOURCE GEOSPATIAL DATA FUSION · v0.1.1</p>
+      <p class="eyebrow">OPEN-SOURCE GEOSPATIAL DATA FUSION · v0.2.0</p>
       <h1>See what the map knows—and where its sources disagree.</h1>
       <p class="lede">This live demo combines two fictional geospatial sources into one canonical world without erasing their evidence. Follow one building from raw records to a resolved identity, twelve traceable claims, and an intentionally preserved conflict.</p>
       <div class="hero-actions">
@@ -151,6 +152,25 @@
       </div>
     </section>
 
+    <section class="capability-section" id="capabilities">
+      <div class="capability-heading">
+        <div><p class="eyebrow">WORKING 0.2 CAPABILITIES</p><h2>Use the same core with real bounded data.</h2></div>
+        <p>The hosted demo stays offline and reproducible. The repository also includes live-source workflows, indexed matching, repeatable configuration, persistence, and four neutral export paths.</p>
+      </div>
+      <div class="capability-grid">
+        <article><span>INGEST</span><h3>Providers developers already meet</h3><p>Local/HTTP GeoJSON, OGC API Features, ArcGIS Feature Services, OSM APIs, and pinned Overture Buildings through its maintained CLI.</p><code>npm run example:overture-osm</code></article>
+        <article><span>RECONCILE</span><h3>Five entity-specific policies</h3><p>Buildings, POIs, addresses, parcels, and roads produce MATCH, AMBIGUOUS, or NO_MATCH with the measured candidate signals attached.</p><code>npm run evaluate:reconciliation</code></article>
+        <article><span>INSPECT + UPDATE</span><h3>Explain and compare snapshots</h3><p>The CLI exposes contributing records, property selection reasons, provenance, conflicts, and affected entities between runs.</p><code>gws inspect · gws diff</code></article>
+        <article><span>EXPORT</span><h3>Keep the result renderer-neutral</h3><p>Canonical JSON retains the complete model; GeoJSON and FlatGeobuf carry the spatial view; PROV-JSON carries a compact lineage graph.</p><code>canonical · geojson · fgb · prov-json</code></article>
+      </div>
+      <div class="scale-strip">
+        <div><span>Largest demonstrated matcher run</span><strong>200,000</strong><small>total generated input records</small></div>
+        <div><span>Reconciliation time</span><strong>771 ms</strong><small>8 GB Apple Silicon validation host</small></div>
+        <div><span>Evaluated candidates</span><strong>100,000</strong><small>instead of 10 billion all-pairs</small></div>
+        <p>These are deterministic grid-throughput measurements, not real-world accuracy or global-scale claims. <a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/VALIDATION.md">Read the complete validation boundary ↗</a></p>
+      </div>
+    </section>
+
     <section class="install-card" id="install">
       <div>
         <p class="eyebrow">USE THE ACTUAL SOFTWARE</p>
@@ -159,6 +179,8 @@
         <div class="download-links">
           <a href="./data/world.json" download>Download canonical JSON</a>
           <a href="./data/world.geojson" download>Download GeoJSON</a>
+          <a href="./data/world.fgb" download>Download FlatGeobuf</a>
+          <a href="./data/world.prov.json" download>Download PROV-JSON</a>
         </div>
       </div>
       <div class="terminal-card">

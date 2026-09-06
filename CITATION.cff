@@ -9,8 +9,7 @@ authors:
 repository-code: "https://github.com/RRG314/geospatial-world-synthesis"
 url: "https://rrg314.github.io/geospatial-world-synthesis/"
 license: MIT
-version: 0.1.1
-date-released: 2026-09-06
+version: 0.2.0
 keywords:
   - geospatial
   - data fusion

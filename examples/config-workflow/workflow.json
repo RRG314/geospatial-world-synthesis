@@ -1,0 +1,21 @@
+{
+  "bounds": [-76.614, 39.289, -76.61, 39.292],
+  "requestedCapabilities": ["poi"],
+  "reconciliation": { "enabled": true },
+  "limits": { "maxRecordsPerProvider": 100, "providerTimeoutMs": 5000 },
+  "providers": [
+    {
+      "type": "local-file",
+      "id": "example-places",
+      "path": "places.geojson",
+      "entityType": "poi",
+      "datasetId": "fictional-example-places",
+      "datasetVersion": "1",
+      "operator": "Geospatial World Synthesis example authors",
+      "licenseId": "CC0-1.0",
+      "attribution": "Fictional example data — CC0-1.0",
+      "publicFields": ["name", "kind"],
+      "fieldMap": { "kind": "category" }
+    }
+  ]
+}

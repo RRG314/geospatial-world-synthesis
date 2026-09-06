@@ -4,6 +4,7 @@ import { parse } from 'yaml';
 import Ajv2020 from 'ajv/dist/2020.js';
 import * as api from 'geospatial-world-synthesis';
 import * as providers from 'geospatial-world-synthesis/providers';
+import * as nodeApi from 'geospatial-world-synthesis/node';
 import exampleConfiguration from '../examples/basic-local/config.mjs';
 
 const markdownFiles = ['README.md', 'ACKNOWLEDGEMENTS.md', 'CHANGELOG.md', 'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'ROADMAP.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md', 'VALIDATION.md', 'docs/api.md', 'docs/architecture.md', 'docs/providers.md'];
@@ -21,12 +22,18 @@ for (const file of markdownFiles) {
 
 const requiredApi = [
   'synthesize', 'synthesizeWorld', 'defineProvider', 'createLocalProvider', 'queryProvider', 'inspectEntity',
-  'reconcileBuildings', 'reconcileBuildingRelationship', 'assessTemporalEvidence', 'resolveRepresentation',
-  'validateGeometry', 'transformGeometry', 'toCanonicalJson', 'toGeoJson', 'SynthesisError', 'ProviderError'
+  'reconcileEntities', 'reconcileBuildings', 'reconcileBuildingRelationship', 'assessTemporalEvidence', 'resolveRepresentation',
+  'validateGeometry', 'transformGeometry', 'geodesicAreaSquareMeters', 'toCanonicalJson', 'toGeoJson', 'toFlatGeobuf',
+  'toProvJson', 'diffSnapshots', 'SynthesisError', 'ProviderError'
 ];
-const requiredProviders = ['createLocalProvider', 'createGeoJsonHttpProvider', 'createOgcApiFeaturesProvider', 'createArcGisFeatureServiceProvider'];
+const requiredProviders = [
+  'createLocalProvider', 'createLocalFileProvider', 'createGeoJsonHttpProvider', 'createOgcApiFeaturesProvider',
+  'createArcGisFeatureServiceProvider', 'createOpenStreetMapProvider', 'createOpenStreetMapMapProvider', 'withProviderCache'
+];
+const requiredNodeApi = ['loadWorkflowConfig', 'createJsonDirectoryStore', 'createPostgisStore', 'WORKFLOW_PROVIDER_TYPES'];
 for (const name of requiredApi) if (!(name in api)) failures.push(`Missing public API export: ${name}`);
 for (const name of requiredProviders) if (!(name in providers)) failures.push(`Missing provider export: ${name}`);
+for (const name of requiredNodeApi) if (!(name in nodeApi)) failures.push(`Missing Node API export: ${name}`);
 
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
 const cff = parse(await readFile('CITATION.cff', 'utf8'));
@@ -46,4 +53,4 @@ if (!images.length) failures.push('README has no project visual.');
 for (const path of images) if (!['.png', '.svg', '.jpg', '.jpeg', '.webp'].includes(extname(path).toLowerCase())) failures.push(`Unsupported README image format: ${path}`);
 
 if (failures.length) throw new Error(failures.join('\n'));
-console.log(`Validated ${markdownFiles.length} documents, ${requiredApi.length + requiredProviders.length} public exports, ${images.length} README visual, CFF metadata, and both JSON Schemas.`);
+console.log(`Validated ${markdownFiles.length} documents, ${requiredApi.length + requiredProviders.length + requiredNodeApi.length} public exports, ${images.length} README visual, CFF metadata, and both JSON Schemas.`);

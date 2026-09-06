@@ -3,11 +3,12 @@
   "$id": "https://rrg314.github.io/geospatial-world-synthesis/schemas/synthesis-result.schema.json",
   "title": "Geospatial World Synthesis result",
   "type": "object",
-  "required": ["schemaVersion", "synthesisVersion", "entities", "claims", "provenance", "providerSummary", "reconciliations", "coverage", "attributions", "fingerprint", "canonicalBytes"],
+  "required": ["schemaVersion", "synthesisVersion", "entities", "sourceRecords", "claims", "provenance", "providerSummary", "reconciliations", "coverage", "attributions", "fingerprint", "canonicalBytes"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "synthesisVersion": { "const": 1 },
     "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "sourceRecords": { "type": "array", "items": { "type": "object", "required": ["id", "providerId", "sourceId", "entityType", "properties", "provenance"] } },
     "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
     "provenance": { "type": "array", "items": { "$ref": "#/$defs/provenance" } },
     "providerSummary": { "type": "array", "items": { "$ref": "#/$defs/providerSummary" } },
@@ -22,19 +23,23 @@
   "$defs": {
     "geometry": {
       "type": "object",
-      "required": ["type", "coordinates"],
-      "properties": { "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"] }, "coordinates": { "type": "array" } }
+      "required": ["type"],
+      "properties": { "type": { "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"] }, "coordinates": { "type": "array" }, "geometries": { "type": "array", "items": { "$ref": "#/$defs/geometry" } } },
+      "oneOf": [
+        { "required": ["coordinates"], "properties": { "type": { "not": { "const": "GeometryCollection" } } } },
+        { "required": ["geometries"], "properties": { "type": { "const": "GeometryCollection" } } }
+      ]
     },
     "entity": {
       "type": "object",
-      "required": ["schemaVersion", "id", "type", "identityScope", "aliases", "geometry", "geometrySourceId", "claimIds", "resolved", "conflicts", "relationships", "lifecycle", "evidenceSummary"],
+      "required": ["schemaVersion", "id", "type", "identityScope", "aliases", "geometry", "geometrySourceId", "claimIds", "resolved", "resolution", "conflicts", "relationships", "lifecycle", "evidenceSummary"],
       "properties": {
         "schemaVersion": { "const": 1 }, "id": { "type": "string", "minLength": 1 },
-        "type": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "terrain"] },
+        "type": { "enum": ["building", "road", "parcel", "water", "landuse", "poi", "address", "terrain"] },
         "identityScope": { "enum": ["gers", "source", "synthesis"] },
         "aliases": { "type": "array" }, "geometry": { "oneOf": [{ "$ref": "#/$defs/geometry" }, { "type": "null" }] },
         "geometrySourceId": { "type": ["string", "null"] }, "claimIds": { "type": "array", "items": { "type": "string" } },
-        "resolved": { "type": "object" }, "conflicts": { "type": "array" }, "relationships": { "type": "array" },
+        "resolved": { "type": "object" }, "resolution": { "type": "object" }, "conflicts": { "type": "array" }, "relationships": { "type": "array" },
         "lifecycle": { "type": "object" }, "evidenceSummary": { "type": "object" }
       }
     },
