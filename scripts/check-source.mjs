@@ -1,10 +1,21 @@
 import { execFile } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 const exec = promisify(execFile);
-const { stdout } = await exec('rg', ['--files', '-g', '!node_modules', '-g', '!output', '-g', '!viewer/data', '-g', '!viewer/dist']);
-const files = stdout.trim().split('\n').filter(Boolean);
+const skippedDirectories = new Set(['.git', '.playwright-cli', 'node_modules', 'output', 'data', 'dist']);
+async function repositoryFiles(directory = '.') {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const paths = [];
+  for (const entry of entries) {
+    const path = join(directory, entry.name).replace(/^\.\//, '');
+    if (entry.isDirectory() && !skippedDirectories.has(entry.name)) paths.push(...await repositoryFiles(path));
+    else if (entry.isFile()) paths.push(path);
+  }
+  return paths;
+}
+const files = (await repositoryFiles()).sort();
 const sourceFiles = files.filter((file) => /\.(?:js|mjs)$/.test(file));
 await Promise.all(sourceFiles.map((file) => exec(process.execPath, ['--check', file])));
 const forbidden = /\b(?:TODO|FIXME|HACK|XXX)\b|sk-[A-Za-z0-9_-]{16,}|AIza[0-9A-Za-z_-]{20,}/;
