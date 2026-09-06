@@ -1,6 +1,6 @@
 {
   "name": "geospatial-world-synthesis",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Renderer-neutral geospatial synthesis with canonical entities, provenance, conflicts, and neutral exports.",
   "type": "module",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/RRG314/geospatial-world-synthesis.git"
   },
-  "homepage": "https://github.com/RRG314/geospatial-world-synthesis#readme",
+  "homepage": "https://rrg314.github.io/geospatial-world-synthesis/",
   "bugs": {
     "url": "https://github.com/RRG314/geospatial-world-synthesis/issues"
   },

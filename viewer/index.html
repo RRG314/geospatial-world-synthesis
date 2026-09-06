@@ -3,75 +3,184 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Inspect a renderer-neutral geospatial synthesis result.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23081015'/%3E%3Cpath d='M6 22 11 9l5 13 5-13 5 13' fill='none' stroke='%2355dfc0' stroke-width='3'/%3E%3C/svg%3E">
+  <meta name="description" content="Explore how Geospatial World Synthesis turns conflicting source records into traceable canonical entities.">
+  <meta property="og:title" content="Geospatial World Synthesis — evidence you can inspect">
+  <meta property="og:description" content="A live, evidence-preserving geospatial synthesis demo.">
+  <meta property="og:image" content="https://rrg314.github.io/geospatial-world-synthesis/assets/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Geospatial World Synthesis — evidence you can inspect">
+  <meta name="twitter:description" content="A live, evidence-preserving geospatial synthesis demo.">
+  <meta name="twitter:image" content="https://rrg314.github.io/geospatial-world-synthesis/assets/social-preview.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2310251f'/%3E%3Cpath d='M7 21 11.5 10l4.5 11 4.5-11L25 21' fill='none' stroke='%23d7f56b' stroke-width='2.5'/%3E%3C/svg%3E">
   <title>Geospatial World Synthesis — evidence viewer</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <header class="masthead">
-    <div>
-      <p class="eyebrow">GEOSPATIAL WORLD SYNTHESIS · v0.1.0</p>
-      <h1>Evidence, reconciled without hiding disagreement.</h1>
-      <p class="lede">A working inspection view of the bundled offline synthesis. Select an entity to trace its claims back to the contributing records.</p>
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a class="wordmark" href="#top" aria-label="Geospatial World Synthesis home"><span>GWS</span><b>Geospatial World Synthesis</b></a>
+    <div class="nav-links">
+      <a href="#inspector">Live demo</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/docs/api.md">API</a>
+      <a class="github-link" href="https://github.com/RRG314/geospatial-world-synthesis">GitHub ↗</a>
     </div>
-    <div class="run-status" aria-label="Synthesis status">
-      <span class="status-dot" aria-hidden="true"></span>
-      <span>Offline run complete</span>
-      <code id="fingerprint">loading…</code>
+  </nav>
+
+  <header class="masthead" id="top">
+    <div class="hero-copy">
+      <p class="eyebrow">OPEN-SOURCE GEOSPATIAL DATA FUSION · v0.1.1</p>
+      <h1>See what the map knows—and where its sources disagree.</h1>
+      <p class="lede">This live demo combines two fictional geospatial sources into one canonical world without erasing their evidence. Follow one building from raw records to a resolved identity, twelve traceable claims, and an intentionally preserved conflict.</p>
+      <div class="hero-actions">
+        <a class="primary-action" href="#inspector">Start the guided demo</a>
+        <a class="secondary-action" href="#how-it-works">How synthesis works ↓</a>
+      </div>
     </div>
+    <aside class="run-status" aria-label="Synthesis status">
+      <div class="status-heading"><span class="status-dot" aria-hidden="true"></span><strong>Offline demo ready</strong></div>
+      <p>Generated during this deployment by the same public <code>synthesize()</code> API you can install.</p>
+      <dl>
+        <div><dt>Entities</dt><dd id="hero-entity-count">—</dd></div>
+        <div><dt>Claims</dt><dd id="hero-claim-count">—</dd></div>
+        <div><dt>Run fingerprint</dt><dd><code id="fingerprint">loading…</code></dd></div>
+      </dl>
+    </aside>
   </header>
 
+  <section class="orientation" id="how-it-works" aria-labelledby="orientation-title">
+    <div class="orientation-intro">
+      <p class="eyebrow">THE 60-SECOND VERSION</p>
+      <h2 id="orientation-title">Sources go in. Evidence stays attached.</h2>
+    </div>
+    <ol class="pipeline">
+      <li><span>01</span><div><strong>Read bounded sources</strong><p>Every provider keeps its identity, license, geometry, and health status.</p></div></li>
+      <li><span>02</span><div><strong>Reconcile conservatively</strong><p>Strong identity evidence can unite records. Uncertain cases remain separate.</p></div></li>
+      <li><span>03</span><div><strong>Inspect neutral output</strong><p>Canonical entities retain every claim, conflict, relationship, and provenance link.</p></div></li>
+    </ol>
+  </section>
+
   <main>
+    <section class="demo-intro" id="inspector">
+      <div>
+        <p class="eyebrow">INTERACTIVE WALKTHROUGH</p>
+        <h2>Follow the Harbor Workshop through the pipeline.</h2>
+        <p>Use the three steps below, select any map feature, or open the evidence tabs. Everything shown comes from the generated synthesis result.</p>
+      </div>
+      <div class="demo-facts" aria-label="Demo scope">
+        <span>Fictional CC0 data</span><span>No login</span><span>No network providers</span>
+      </div>
+    </section>
+
+    <section class="guide" aria-label="Guided synthesis walkthrough">
+      <button type="button" class="guide-step" data-guide="sources" aria-pressed="false"><span>1</span><div><strong>Compare sources</strong><small>Two records, two coordinate systems</small></div></button>
+      <button type="button" class="guide-step active" data-guide="decision" aria-pressed="true"><span>2</span><div><strong>See the decision</strong><small>Why these records became one entity</small></div></button>
+      <button type="button" class="guide-step" data-guide="result" aria-pressed="false"><span>3</span><div><strong>Inspect the result</strong><small>Claims, conflict, lineage, export</small></div></button>
+    </section>
+
     <section class="metrics" aria-label="Synthesis metrics">
-      <article><span>Canonical entities</span><strong id="entity-count">—</strong></article>
-      <article><span>Evidence claims</span><strong id="claim-count">—</strong></article>
-      <article><span>Source records</span><strong id="source-count">—</strong></article>
-      <article><span>Unresolved conflicts</span><strong class="warn" id="conflict-count">—</strong></article>
+      <article><span>Canonical entities</span><strong id="entity-count">—</strong><small>building · parcel · road · POI</small></article>
+      <article><span>Evidence claims</span><strong id="claim-count">—</strong><small>each linked to a source record</small></article>
+      <article><span>Source records</span><strong id="source-count">—</strong><small>across two available providers</small></article>
+      <article><span>Preserved conflicts</span><strong class="warn" id="conflict-count">—</strong><small>visible, not silently discarded</small></article>
     </section>
 
     <section class="workspace">
-      <div class="map-card">
+      <article class="map-card">
         <div class="section-heading">
-          <div><p class="eyebrow">BOUNDED OUTPUT</p><h2>Harbor workshop example</h2></div>
-          <div class="legend" aria-label="Map legend">
-            <span><i class="swatch source-a"></i>Registry</span>
-            <span><i class="swatch source-b"></i>Survey</span>
-            <span><i class="swatch canonical"></i>Canonical</span>
-          </div>
+          <div><p class="eyebrow">SPATIAL EVIDENCE</p><h2>Source geometry and canonical output</h2></div>
+          <span class="coordinate-badge">OGC:CRS84</span>
         </div>
+        <p class="section-help" id="map-help">The same building footprint appears in both sources. The survey geometry was transformed from EPSG:3857 before synthesis.</p>
         <div class="layer-controls" role="group" aria-label="Visible evidence layers">
-          <button type="button" data-layer="harbor-registry" aria-pressed="true">Registry source</button>
-          <button type="button" data-layer="height-survey" aria-pressed="true">Survey source</button>
-          <button type="button" data-layer="canonical" aria-pressed="true">Canonical output</button>
+          <button type="button" data-layer="harbor-registry" aria-pressed="true"><i class="swatch source-a"></i>Registry source</button>
+          <button type="button" data-layer="height-survey" aria-pressed="true"><i class="swatch source-b"></i>Survey source</button>
+          <button type="button" data-layer="canonical" aria-pressed="true"><i class="swatch canonical"></i>Canonical output</button>
         </div>
-        <svg id="map" viewBox="0 0 900 520" role="img" aria-labelledby="map-title map-description">
-          <title id="map-title">Synthesized fictional harbor features</title>
-          <desc id="map-description">Overlaid source and canonical building, parcel, road and point of interest geometries.</desc>
-        </svg>
-        <p class="map-note">Fictional CC0 example data · coordinates shown in OGC:CRS84 · no external service required</p>
-      </div>
+        <div class="map-frame">
+          <svg id="map" viewBox="0 0 900 520" role="img" aria-labelledby="map-title map-description">
+            <title id="map-title">Synthesized fictional harbor features</title>
+            <desc id="map-description">Overlaid source and canonical building, parcel, road and point of interest geometries.</desc>
+          </svg>
+          <div class="map-compass" aria-hidden="true">N<br><span>↑</span></div>
+        </div>
+        <div class="map-footer"><span>Click a green feature to inspect it</span><span id="selected-map-label">Selected: Harbor Workshop</span></div>
+      </article>
 
       <aside class="entity-card" aria-live="polite">
-        <p class="eyebrow">CANONICAL ENTITY</p>
+        <div class="inspector-heading">
+          <div><p class="eyebrow">ENTITY INSPECTOR</p><label for="entity-select">Choose a canonical entity</label></div>
+          <span class="entity-position" id="entity-position">1 / 4</span>
+        </div>
         <select id="entity-select" aria-label="Select canonical entity"></select>
+        <div class="inspector-tabs" role="tablist" aria-label="Entity details">
+          <button type="button" role="tab" data-tab="summary" aria-selected="false">Summary</button>
+          <button type="button" role="tab" data-tab="evidence" aria-selected="false">Evidence</button>
+          <button type="button" role="tab" data-tab="decision" aria-selected="true">Decision</button>
+          <button type="button" role="tab" data-tab="json" aria-selected="false">JSON</button>
+        </div>
         <div id="entity-detail"></div>
       </aside>
     </section>
 
+    <section class="decision-callout" id="decision-story" aria-live="polite">
+      <div class="decision-marker">MATCH</div>
+      <div><p class="eyebrow">RECONCILIATION EXPLAINED</p><h2 id="decision-title">Two source records, one defensible identity.</h2><p id="decision-copy">Both building records carry the same stable GERS identifier. The engine uses that explicit shared identity—not a vague confidence score—to group them.</p></div>
+      <div class="decision-path" aria-label="Reconciliation path"><span>building-17</span><i>+</i><span>survey-feature-a</span><b>→</b><strong>Harbor Workshop</strong></div>
+    </section>
+
     <section class="lower-grid">
       <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">SOURCE HEALTH</p><h2>Provider results</h2></div><span class="pill ok">2 available</span></div>
+        <div class="section-heading"><div><p class="eyebrow">SOURCE HEALTH</p><h2>What actually answered this run</h2></div><span class="pill ok">2 available</span></div>
+        <p class="section-help">A provider failure would be reported here—not misread as an empty place.</p>
         <div id="providers"></div>
       </article>
-      <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">WHY THIS MATTERS</p><h2>Conflict preserved</h2></div><span class="pill warning">unresolved</span></div>
-        <p>Both sources describe the same building, but report different heights. The canonical entity keeps both claims and their provenance instead of silently choosing one.</p>
+      <article class="panel conflict-panel">
+        <div class="section-heading"><div><p class="eyebrow">DISAGREEMENT</p><h2>The conflict the engine kept</h2></div><span class="pill warning">unresolved</span></div>
+        <p>Both sources describe the same building, but report different heights. The canonical entity selects an effective value while retaining both direct claims and their dates.</p>
         <div class="conflict-compare" id="conflict-compare"></div>
       </article>
     </section>
+
+    <section class="evidence-guide">
+      <div><p class="eyebrow">READING THE OUTPUT</p><h2>Evidence classes are labels, not one fake confidence score.</h2></div>
+      <div class="evidence-key">
+        <article><span class="evidence-dot direct"></span><div><strong>Direct source</strong><p>A provider explicitly supplied this value.</p></div></article>
+        <article><span class="evidence-dot derived"></span><div><strong>Derived</strong><p>A repeatable method produced this relationship or value.</p></div></article>
+        <article><span class="evidence-dot conflict"></span><div><strong>Conflicting</strong><p>Supported claims disagree and remain inspectable.</p></div></article>
+        <article><span class="evidence-dot synthetic"></span><div><strong>Synthetic</strong><p>Generated content must always be disclosed as such.</p></div></article>
+      </div>
+    </section>
+
+    <section class="install-card" id="install">
+      <div>
+        <p class="eyebrow">USE THE ACTUAL SOFTWARE</p>
+        <h2>Clone it. Run the same synthesis. Inspect the files.</h2>
+        <p>The first run is deliberately offline. It writes canonical JSON and GeoJSON you can use without this viewer or World Explorer.</p>
+        <div class="download-links">
+          <a href="./data/world.json" download>Download canonical JSON</a>
+          <a href="./data/world.geojson" download>Download GeoJSON</a>
+        </div>
+      </div>
+      <div class="terminal-card">
+        <div class="terminal-top"><span>Terminal</span><button type="button" id="copy-command">Copy</button></div>
+        <pre><code id="install-command">git clone https://github.com/RRG314/geospatial-world-synthesis.git
+cd geospatial-world-synthesis
+npm ci
+npm run example</code></pre>
+      </div>
+    </section>
+
+    <section class="scope-note">
+      <strong>What this demo does—and does not prove.</strong>
+      <p>It demonstrates the real public data model, deterministic synthesis, evidence tracing, conflict retention, CRS normalization, and neutral exports on a small fictional dataset. It is not a full GIS client, universal conflation benchmark, cadastral authority, or safety-critical system.</p>
+      <a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/VALIDATION.md">Read validation and limitations ↗</a>
+    </section>
   </main>
-  <footer>Renderer-neutral output · deterministic fingerprint · explicit evidence lineage</footer>
+
+  <footer>
+    <div><span class="footer-mark">GWS</span><p>Renderer-neutral geospatial synthesis with evidence intact.</p></div>
+    <div class="footer-links"><a href="https://github.com/RRG314/geospatial-world-synthesis">Source</a><a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/LICENSE">MIT License</a><a href="https://github.com/RRG314/geospatial-world-synthesis/blob/main/CITATION.cff">Citation</a></div>
+  </footer>
   <script src="./dist/app.js"></script>
 </body>
 </html>

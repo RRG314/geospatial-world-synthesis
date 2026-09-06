@@ -4,6 +4,7 @@ dist/
 output/
 viewer/data/
 viewer/dist/
+viewer/assets/
 *.tgz
 .env
 .env.*

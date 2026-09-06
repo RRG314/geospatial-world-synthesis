@@ -11,5 +11,5 @@ for (const path of required) if (!paths.includes(path)) throw new Error(`Package
 const forbidden = paths.filter((path) => /^(?:test|examples|viewer|docs|output|\.github)\//.test(path) || /(?:\.env|research|benchmark)/i.test(path));
 if (forbidden.length) throw new Error(`Package includes non-runtime files: ${forbidden.join(', ')}`);
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
-if (packageJson.version !== '0.1.0' || packageJson.license !== 'MIT') throw new Error('Unexpected release metadata.');
+if (!/^\d+\.\d+\.\d+$/.test(packageJson.version) || packageJson.license !== 'MIT') throw new Error('Unexpected release metadata.');
 console.log(`Package boundary valid: ${paths.length} files, ${manifest.size} packed bytes, ${manifest.unpackedSize} unpacked bytes.`);

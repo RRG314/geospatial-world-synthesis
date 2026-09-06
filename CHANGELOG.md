@@ -2,6 +2,15 @@
 
 All notable public changes are documented here. The project follows Semantic Versioning; during 0.x development, a minor release may contain breaking API changes.
 
+## 0.1.1 — 2026-09-06
+
+- Rebuilt the GitHub Pages demo around a guided source-to-canonical walkthrough.
+- Added entity summary, evidence, reconciliation reasoning, and raw JSON inspection tabs.
+- Added keyboard-selectable map features, clearer layer comparison, evidence-class guidance, and responsive mobile layouts.
+- Added direct downloads of the demo's canonical JSON and GeoJSON output.
+- Expanded browser checks to cover the walkthrough, inspector tabs, public assets, exports, and mobile overflow.
+- Replaced repository screenshots with images from the current software.
+
 ## 0.1.0 — 2026-09-06
 
 - Initial standalone release.

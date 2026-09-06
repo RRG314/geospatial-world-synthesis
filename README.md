@@ -20,14 +20,14 @@ npm run example
 
 The example is offline and requires no API key. It writes `output/basic-local/world.json` and `world.geojson`, then reports four canonical entities, twelve claims, one preserved conflict, provider status, and the deterministic content fingerprint.
 
-To open the same result in the inspection viewer:
+To open the same result in the guided evidence viewer:
 
 ```bash
 npm run build
 npm run viewer
 ```
 
-Open <http://127.0.0.1:4173>. The hosted build is also available through [GitHub Pages](https://rrg314.github.io/geospatial-world-synthesis/) after deployment.
+Open <http://127.0.0.1:4173>. The [hosted GitHub Pages demo](https://rrg314.github.io/geospatial-world-synthesis/) walks through source comparison, reconciliation reasoning, claims, provenance, relationships, conflicts, raw entity JSON, and downloadable neutral exports.
 
 ## The core idea
 
@@ -70,7 +70,7 @@ console.log(toGeoJson(world));
 - Canonical entity IDs distinct from provider record IDs, with optional GERS aliases.
 - Inspectable claims, provenance, evidence classes, conflicts, spatial relationships, attribution, and provider degradation.
 - Deterministic canonical JSON and standard GeoJSON FeatureCollection exports.
-- Node.js API and CLI, plus a static browser inspection demo suitable for GitHub Pages.
+- Node.js API and CLI, plus a guided, keyboard-accessible browser inspection demo deployed on GitHub Pages.
 
 The guaranteed example uses small fictional CC0 data. Network adapters are secondary: service availability, terms, limits, schemas, and data quality remain the user's responsibility. OpenStreetMap, Overture ingestion, CityJSON export, terrain processing, deletion feeds, and a universal conflation model are not included in v0.1.0.
 
