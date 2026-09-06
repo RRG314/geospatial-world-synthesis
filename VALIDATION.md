@@ -100,7 +100,7 @@ This demonstrates an evidence-preserving output contract. It does not establish 
 
 The atomic JSON directory store is exercised end-to-end. It saves immutable fingerprinted snapshots, tracks the latest pointer, lists versions, loads a selected version, and reports affected entities through `diffSnapshots()`.
 
-The PostGIS reference store creates snapshot and normalized current-state tables, uses `geometry(Geometry, 4326)` columns with GiST indexes, acquires a per-world advisory transaction lock, and upserts/deletes only changed source records, entities, claims, and provenance. Unit tests validate its SQL sequence, rollback behavior, diff application, and PostGIS capability probe through a recording client. A real PostGIS server has **not** yet completed the release integration check on the current validation host, so PostGIS is experimental and must not be represented as production-validated in 0.2.0. Run `DATABASE_URL=... npm run example:postgis` against a disposable database before depending on it.
+The PostGIS reference store creates snapshot and normalized current-state tables, uses `geometry(Geometry, 4326)` columns with GiST indexes, acquires a per-world advisory transaction lock, and upserts/deletes only changed source records, entities, claims, and provenance. Unit tests validate its SQL sequence, rollback behavior, diff application, and PostGIS capability probe through a recording client. The release workflow also completed `npm run example:postgis` against PostgreSQL 17 with PostGIS 3.5 on 2026-09-06. This validates installation, schema creation, save/load, and transactional updates; it is not a long-duration, concurrent-load, backup/restore, or migration benchmark.
 
 ## Independent export checks
 

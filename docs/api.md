@@ -132,7 +132,7 @@ await store.save(world);
 - `loadWorkflowConfig(path)` loads declarative JSON, expands `${UPPER_CASE_ENVIRONMENT_VARIABLES}`, resolves local-file paths relative to the config, and creates supported built-in providers.
 - `WORKFLOW_PROVIDER_TYPES` lists accepted `type` values.
 - `createJsonDirectoryStore(directory)` provides atomic fingerprinted snapshots, latest/load/list, and diff-aware incremental saves.
-- `createPostgisStore(client, { schema?, worldId? })` accepts a connected node-postgres-compatible client, validates `PostGIS_Version()`, creates snapshot/current-state tables with EPSG:4326 geometry and GiST indexes, and applies collection diffs in a transaction. This backend is experimental in 0.2.0 pending a real-database release check.
+- `createPostgisStore(client, { schema?, worldId? })` accepts a connected node-postgres-compatible client, validates `PostGIS_Version()`, creates snapshot/current-state tables with EPSG:4326 geometry and GiST indexes, and applies collection diffs in a transaction. The release workflow validates it against PostgreSQL 17 with PostGIS 3.5.
 - `createOvertureMapsProvider({ id, release, ... })` creates the Node-only bounded Overture Buildings provider. It shells out without a command shell to `uvx overturemaps` by default; configure `command`/`commandArgs`, timeout, and download-size limits when embedding it.
 
 ## CLI

@@ -2,11 +2,11 @@
 
 All notable public changes are documented here. The project follows Semantic Versioning; during 0.x development, a minor release may contain breaking API changes.
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-09-06
 
 - Added bounded OpenStreetMap Overpass, small-area OpenStreetMap map API, and local-file providers plus a provider cache wrapper and repeatable JSON workflow configuration.
 - Generalized indexed reconciliation across buildings, POIs, addresses, parcels, and roads while preserving ambiguity and specialized building relationship handling.
-- Retained normalized source records in snapshots and added property-resolution explanations, snapshot diffs, atomic JSON persistence, and an experimental PostGIS reference store.
+- Retained normalized source records in snapshots and added property-resolution explanations, snapshot diffs, atomic JSON persistence, and a PostGIS reference store validated against PostGIS 3.5.
 - Added GeometryCollection handling, polygon topology diagnostics, antimeridian warnings, and geodesic area measurement without silent topology repair.
 - Added FlatGeobuf and PROV-JSON exports and expanded the CLI with inspect, reconcile, diff, and export commands.
 - Added live OSM, Overture+OSM, and government ArcGIS examples, a Node-only bounded Overture Buildings provider, an incremental-update example, a deterministic baseline evaluation, and 10k/100k scale measurements.

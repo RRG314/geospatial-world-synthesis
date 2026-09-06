@@ -77,7 +77,7 @@ console.log(toGeoJson(world));
 - GeoJSON geometry families including GeometryCollection, polygon ring/hole checks, self-intersection rejection, antimeridian diagnostics, and geodesic area measurement. Uncertain geometry is not silently repaired.
 - Inspectable property-resolution reasons, original claims, evidence classes, provenance, conflicts, relationships, reconciliation scores, and temporal assessments.
 - Deterministic canonical JSON, GeoJSON, FlatGeobuf, and a deliberately small PROV-JSON mapping.
-- Snapshot diffing, an atomic JSON directory store, and an optional PostGIS reference store. The PostGIS path is experimental until it has passed the real-database release job described in [VALIDATION.md](VALIDATION.md).
+- Snapshot diffing, an atomic JSON directory store, and an optional PostGIS reference store validated in CI against PostgreSQL 17 with PostGIS 3.5.
 - An ESM JavaScript API, TypeScript declarations, a workflow JSON loader, and CLI commands for `synthesize`, `reconcile`, `inspect`, `diff`, and `export`.
 
 The engine does not rank all evidence with one confidence number. Identity decisions, property evidence class, source lineage, temporal state, and application representation policy are separate and independently inspectable.
@@ -108,7 +108,7 @@ Configuration supports `${ENVIRONMENT_VARIABLE}` expansion and resolves local-fi
 | [`overture-osm`](examples/overture-osm/) | Pinned Overture Buildings provider plus live OSM reconciliation | `uvx`; ODbL and source attribution |
 | [`arcgis-government`](examples/arcgis-government/) | Bounded, paginated government ArcGIS Feature Service | Provider portal terms; live availability |
 | [`export`](examples/export/) | Canonical JSON and GeoJSON export | None; fictional CC0 fixture |
-| [`postgis`](examples/postgis/) | Optional schema initialization and snapshot storage | Disposable PostGIS database required; experimental |
+| [`postgis`](examples/postgis/) | Optional schema initialization and transactional snapshot storage | Disposable PostGIS database required |
 
 Live examples are deliberately not part of first-run success. Public endpoints, schemas, service terms, and rate limits can change independently of this project.
 
