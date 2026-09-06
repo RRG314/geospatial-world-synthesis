@@ -71,8 +71,8 @@
   },
   "devDependencies": {
     "ajv": "8.20.0",
-    "esbuild": "0.25.12",
-    "playwright": "1.61.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.63.0",
     "typescript": "7.0.2",
     "yaml": "2.9.0"
   }
