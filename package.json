@@ -79,7 +79,7 @@
     "viewer": "node scripts/serve-viewer.mjs"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.11.1",
+    "fast-xml-parser": "^5.11.2",
     "flatgeobuf": "^4.4.0",
     "polygon-clipping": "0.15.7",
     "proj4": "2.22.0",
